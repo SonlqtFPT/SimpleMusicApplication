@@ -27,6 +27,7 @@ namespace SimpleMusicApplication
         private DispatcherTimer positionTimer;
         private bool isDraggingSlider = false;
         private bool isAutoplay = false;
+        private TimeSpan totalListeningTime = TimeSpan.Zero;
 
         public MainWindow()
         {
@@ -41,13 +42,6 @@ namespace SimpleMusicApplication
             waveOutDevice.PlaybackStopped += OnPlaybackStopped;
         }
 
-        private void PositionTimer_Tick(object sender, EventArgs e)
-        {
-            if (audioFileReader != null && audioFileReader.Length > 0 && !isDraggingSlider)
-            {
-                PositionSlider.Value = audioFileReader.CurrentTime.TotalSeconds / audioFileReader.TotalTime.TotalSeconds;
-            }
-        }
 
         private async void AddMusicButton_Click(object sender, RoutedEventArgs e)
         {
@@ -220,7 +214,7 @@ namespace SimpleMusicApplication
 
                 // Update UI
                 MusicTitleTextBlock.Text = Path.GetFileName(filePath);
-                MusicInfoTextBlock.Text = $"Duration: {audioFileReader.TotalTime}";
+                MusicInfoTextBlock.Text = $"Duration: {audioFileReader.TotalTime.ToString(@"hh\:mm\:ss")}";
                 PlaylistListBox.SelectedIndex = currentTrackIndex;
 
                 // Ensure track index is added to playedIndices in shuffle mode only
@@ -354,10 +348,11 @@ namespace SimpleMusicApplication
             if (audioFileReader != null && audioFileReader.CanSeek)
             {
                 audioFileReader.CurrentTime = TimeSpan.FromSeconds(audioFileReader.TotalTime.TotalSeconds * PositionSlider.Value);
+                UpdatePosition();
             }
         }
 
-        private void PositionSlider_DragStarted(object sender, DragStartedEventArgs e)
+        private void PositionSlider_PreviewMouseDown(object sender, MouseButtonEventArgs e)
         {
             var slider = sender as Slider;
             var thumb = FindVisualChild<Thumb>(slider);
@@ -395,6 +390,7 @@ namespace SimpleMusicApplication
                     }
                 }
             }
+            return null;
         }
 
         private void Youtube_Click(object sender, RoutedEventArgs e)
@@ -407,15 +403,15 @@ namespace SimpleMusicApplication
 
         private void Window_Loaded(object sender, RoutedEventArgs e)
         {
-            if(playlist != null)
+            if (playlist != null)
             {
                 PlaylistListBox.Items.Clear();
-                foreach(string fileName in playlist)
-                {       
-                        
-                        PlaylistListBox.Items.Add(Path.GetFileName(fileName));
+                foreach (string fileName in playlist)
+                {
+
+                    PlaylistListBox.Items.Add(Path.GetFileName(fileName));
                 }
-                
+
             }
         }
     }
