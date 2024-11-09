@@ -25,6 +25,7 @@ namespace SimpleMusicApplication
         private DispatcherTimer positionTimer;
         private bool isDraggingSlider = false;
         private bool isAutoplay = false;
+        private float previousVolume;
 
         public MainWindow()
         {
@@ -345,6 +346,20 @@ namespace SimpleMusicApplication
             {
                 audioFileReader.CurrentTime = TimeSpan.FromSeconds(audioFileReader.TotalTime.TotalSeconds * PositionSlider.Value);
             }
+        }
+
+        private void MuteCheckBox_Checked(object sender, RoutedEventArgs e)
+        {
+            // Lưu mức âm lượng hiện tại
+            previousVolume = waveOutDevice.Volume;
+            // Đặt âm lượng về 0 để tắt tiếng
+            waveOutDevice.Volume = 0f;
+        }
+
+        private void MuteCheckBox_UnChecked(object sender, RoutedEventArgs e)
+        {
+            // Khôi phục lại mức âm lượng trước đó
+            waveOutDevice.Volume = previousVolume;
         }
     }
 }

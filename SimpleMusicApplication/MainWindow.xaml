@@ -15,6 +15,7 @@
             <TextBlock x:Name="MusicTitleTextBlock" FontSize="20" FontWeight="Bold" Margin="0,0,0,10" Text="Select a Song"/>
             <TextBlock x:Name="MusicInfoTextBlock" FontSize="14" Text="Duration: 0:00"/>
             <CheckBox Content="Autoplay" Checked="AutoplayCheckbox_Checked" Unchecked="AutoplayCheckbox_Unchecked" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="10"/>
+            <CheckBox x:Name="MuteCheckBox" Content="Mute" Margin="10,0,0,0" Checked="MuteCheckBox_Checked" Unchecked="MuteCheckBox_UnChecked"/>
 
             <Slider x:Name="VolumeSlider" Minimum="0" Maximum="1" Value="0.5" TickFrequency="0.1" 
                     IsSnapToTickEnabled="True" VerticalAlignment="Bottom" HorizontalAlignment="Left" 
@@ -43,7 +44,7 @@
             <Button x:Name="AddMusicButton" Content="Add Music" Width="100" Margin="0,10" Click="AddMusicButton_Click"/>
 
             <Button x:Name="SavePlaylistButton" Content="Save Playlist" Click="SavePlaylistButton_Click" Margin="5"/>
-            
+
             <Button x:Name="LoadPlaylistButton" Content="Load Playlist" Click="LoadPlaylistButton_Click" Margin="5"/>
         </StackPanel>
     </Grid>
