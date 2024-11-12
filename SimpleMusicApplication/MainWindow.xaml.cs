@@ -16,6 +16,7 @@ using System.Windows.Media;
 using System.Drawing;
 using System.Windows.Input;
 using System.Windows.Media.Imaging;
+using System.Collections.ObjectModel;
 
 
 namespace SimpleMusicApplication
@@ -24,7 +25,7 @@ namespace SimpleMusicApplication
     {
         private WaveOutEvent waveOutDevice;
         private WaveStream audioFileReader;
-        private List<string> playlist = new List<string>();
+        private List<String> playlist = new List<string>();
         private List<int> playedIndices = new List<int>();
         private int currentTrackIndex = 0;
         private bool isShuffle = false;
@@ -67,14 +68,6 @@ namespace SimpleMusicApplication
 
             waveOutDevice.PlaybackStopped += OnPlaybackStopped;
         }      
-
-        private void TrayIcon_DoubleClick(object sender, RoutedEventArgs e)
-        {
-            // Show the window when the tray icon is double-clicked
-            this.Show();
-            this.WindowState = WindowState.Normal;
-            this.Activate();  // Bring the window to the front
-        }
 
         protected override void OnClosed(EventArgs e)
         {
@@ -446,7 +439,7 @@ namespace SimpleMusicApplication
             }
         }
 
-        private void AddFolderButton_Click(object sender, RoutedEventArgs e)
+        private void AddFolder_Click(object sender, RoutedEventArgs e)
         {
             OpenFileDialog openFileDialog = new OpenFileDialog
             {
@@ -519,6 +512,59 @@ namespace SimpleMusicApplication
                     LoopIcon.Source = new BitmapImage(new Uri("pack://application:,,,/Assets/noLoop.ico"));
                     LoopText.Text = "No Loop";
                     break;
+            }
+        }
+
+        private void ClearAllButton_Click(object sender, RoutedEventArgs e)
+        {
+
+            waveOutDevice?.Stop();
+            audioFileReader?.Dispose();
+            audioFileReader = null;          
+
+            playlist.Clear();
+            PlaylistListBox.ItemsSource = null;
+            PlaylistListBox.ItemsSource = playlist;
+
+            MusicTitleTextBlock.Text = "No music playing";
+            MusicInfoTextBlock.Text = "Duration: 0:00";
+            PositionSlider.Value = 0;
+
+        }
+
+        private void AddFileButton_Click(object sender, RoutedEventArgs e)
+        {
+            var button = sender as Button;
+            var menu = button.ContextMenu;
+            menu.IsOpen = true;
+        }
+
+        private void AddFileButton_PreviewKeyDown(object sender, KeyEventArgs e)
+        {
+            
+            if (e.Key == Key.Space)
+            {
+                e.Handled = true;  
+            }
+        }
+
+        private void AddFile_Click(object sender, RoutedEventArgs e)
+        {
+            OpenFileDialog openFileDialog = new OpenFileDialog();
+            openFileDialog.Filter = "Audio Files|*.mp3;*.wav";
+            openFileDialog.Multiselect = true;
+
+            if (openFileDialog.ShowDialog() == true)
+            {
+                foreach (var file in openFileDialog.FileNames)
+                {
+                    if (!playlist.Contains(file))
+                    {
+                        playlist.Add(file);
+                        PlaylistListBox.ItemsSource = playlist.Select(file => Path.GetFileName(file)).ToList();
+
+                    }
+                }
             }
         }
     }
