@@ -30,7 +30,9 @@
                 <Button x:Name="PlayButton" Content="Play" Width="75" Click="PlayButton_Click"/>
                 <Button x:Name="PauseButton" Content="Pause" Width="75" Click="PauseButton_Click"/>
                 <Button x:Name="PreviousButton" Content="Previous" Width="75" Click="PreviousButton_Click"/>
-                <Button x:Name="NextButton" Content="Next" Width="75" Click="NextButton_Click"/>
+                <Button x:Name="NextButton" Width="75" Click="NextButton_Click">
+                    <Button Content="Button"/>
+                </Button>
             </StackPanel>
 
             <!-- Playback Modes -->
@@ -40,10 +42,10 @@
             </StackPanel>
 
             <!-- Add Music Button -->
-            <Button x:Name="AddMusicButton" Content="Add Music" Width="100" Margin="0,10" Click="AddMusicButton_Click"/>
+            <Button x:Name="AddFolderButton" Content="Add Folder" Width="100" Margin="0,10" Click="AddFolderButton_Click"/>
 
             <Button x:Name="SavePlaylistButton" Content="Save Playlist" Click="SavePlaylistButton_Click" Margin="5"/>
-            
+
             <Button x:Name="LoadPlaylistButton" Content="Load Playlist" Click="LoadPlaylistButton_Click" Margin="5"/>
         </StackPanel>
     </Grid>

@@ -12,6 +12,7 @@ using System.Threading.Tasks;
 using System.Windows.Threading;
 using System.Windows.Controls.Primitives;
 
+
 namespace SimpleMusicApplication
 {
     public partial class MainWindow : Window
@@ -389,6 +390,26 @@ namespace SimpleMusicApplication
             {
                 MessageBox.Show("Have error here: " + ex.Message);
             }
+        }
+
+        private void AddFolderButton_Click(object sender, RoutedEventArgs e)
+        {
+            OpenFileDialog openFileDialog = new OpenFileDialog
+            {
+                ValidateNames = false,
+                CheckFileExists = false,
+                CheckPathExists = true,
+                FileName = "Folder Selection."
+            };
+
+            if (openFileDialog.ShowDialog() == true)
+            {              
+                string folderPath = System.IO.Path.GetDirectoryName(openFileDialog.FileName);
+                LoadSongFromFolder(folderPath);
+            }
+
+
+
         }
     }
 }
