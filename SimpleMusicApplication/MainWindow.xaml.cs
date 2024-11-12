@@ -20,7 +20,7 @@ namespace SimpleMusicApplication
     {
         private WaveOutEvent waveOutDevice;
         private WaveStream audioFileReader;
-        private List<string> playlist = new List<string>();
+        public List<string> playlist = new List<string>();
         private List<int> playedIndices = new List<int>();
         private int currentTrackIndex = 0;
         private bool isShuffle = false;
@@ -389,6 +389,31 @@ namespace SimpleMusicApplication
                         return result;
                     }
                 }
+
+            }
+            return null;
+        }
+
+        private void Youtube_Click(object sender, RoutedEventArgs e)
+        {
+            YoutubeWindow youtubeWindow = new();
+            youtubeWindow.PlayList = playlist;
+            youtubeWindow.ShowDialog();
+            this.Hide();
+        }
+
+        private void Window_Loaded(object sender, RoutedEventArgs e)
+        {
+            if (playlist != null)
+            {
+                PlaylistListBox.Items.Clear();
+                foreach (string fileName in playlist)
+                {
+
+                    PlaylistListBox.Items.Add(Path.GetFileName(fileName));
+                }
+
+
             }
             return null;
         }
