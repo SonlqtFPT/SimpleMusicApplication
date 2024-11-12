@@ -11,6 +11,8 @@ using System.Runtime.InteropServices;
 using System.Threading.Tasks;
 using System.Windows.Threading;
 using System.Windows.Controls.Primitives;
+using System.Windows.Input;
+using System.Windows.Media;
 
 namespace SimpleMusicApplication
 {
@@ -25,6 +27,7 @@ namespace SimpleMusicApplication
         private DispatcherTimer positionTimer;
         private bool isDraggingSlider = false;
         private bool isAutoplay = false;
+        private TimeSpan totalListeningTime = TimeSpan.Zero;
 
         public MainWindow()
         {
@@ -39,13 +42,6 @@ namespace SimpleMusicApplication
             waveOutDevice.PlaybackStopped += OnPlaybackStopped;
         }
 
-        private void PositionTimer_Tick(object sender, EventArgs e)
-        {
-            if (audioFileReader != null && audioFileReader.Length > 0 && !isDraggingSlider)
-            {
-                PositionSlider.Value = audioFileReader.CurrentTime.TotalSeconds / audioFileReader.TotalTime.TotalSeconds;
-            }
-        }
 
         private async void AddMusicButton_Click(object sender, RoutedEventArgs e)
         {
@@ -218,7 +214,7 @@ namespace SimpleMusicApplication
 
                 // Update UI
                 MusicTitleTextBlock.Text = Path.GetFileName(filePath);
-                MusicInfoTextBlock.Text = $"Duration: {audioFileReader.TotalTime}";
+                MusicInfoTextBlock.Text = $"Duration: {audioFileReader.TotalTime.ToString(@"hh\:mm\:ss")}";
                 PlaylistListBox.SelectedIndex = currentTrackIndex;
 
                 // Ensure track index is added to playedIndices in shuffle mode only
@@ -325,26 +321,76 @@ namespace SimpleMusicApplication
             }
         }
 
+        private void UpdatePosition()
+        {
+            if (audioFileReader != null && audioFileReader.Length > 0)
+            {
+                var currentTime = audioFileReader.CurrentTime.TotalSeconds / audioFileReader.TotalTime.TotalSeconds;
+                PositionSlider.ValueChanged -= PositionSlider_ValueChanged; // Detach event handler
+                PositionSlider.Value = currentTime;
+                PositionSlider.ValueChanged += PositionSlider_ValueChanged; // Reattach event handler
+                CurrentTimeTextBlock.Text = TimeSpan.FromSeconds(audioFileReader.CurrentTime.TotalSeconds).ToString(@"mm\:ss");
+                TotalListeningTimeTextBlock.Text = $"Total Listening Time: {totalListeningTime.ToString(@"hh\:mm\:ss")}";
+            }
+        }
+
+        private void PositionTimer_Tick(object sender, EventArgs e)
+        {
+            if (!isDraggingSlider && waveOutDevice.PlaybackState == PlaybackState.Playing)
+            {
+                totalListeningTime = totalListeningTime.Add(TimeSpan.FromSeconds(1));
+                UpdatePosition();
+            }
+        }
+
         private void PositionSlider_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
         {
             if (audioFileReader != null && audioFileReader.CanSeek)
             {
                 audioFileReader.CurrentTime = TimeSpan.FromSeconds(audioFileReader.TotalTime.TotalSeconds * PositionSlider.Value);
+                UpdatePosition();
             }
         }
 
-        private void PositionSlider_DragStarted(object sender, DragStartedEventArgs e)
+        private void PositionSlider_PreviewMouseDown(object sender, MouseButtonEventArgs e)
         {
-            isDraggingSlider = true;
-        }
+            var slider = sender as Slider;
+            var thumb = FindVisualChild<Thumb>(slider);
 
-        private void PositionSlider_DragCompleted(object sender, DragCompletedEventArgs e)
-        {
-            isDraggingSlider = false;
-            if (audioFileReader != null && audioFileReader.CanSeek)
+            if (thumb != null)
             {
-                audioFileReader.CurrentTime = TimeSpan.FromSeconds(audioFileReader.TotalTime.TotalSeconds * PositionSlider.Value);
+                Point position = e.GetPosition(thumb);
+                if (!IsPointInsideThumb(thumb, position))
+                {
+                    e.Handled = true; // Prevent the click from being processed if it's outside the thumb
+                }
             }
+        }
+
+        private bool IsPointInsideThumb(Thumb thumb, Point point)
+        {
+            return new Rect(0, 0, thumb.ActualWidth, thumb.ActualHeight).Contains(point);
+        }
+
+        private T FindVisualChild<T>(DependencyObject parent) where T : DependencyObject
+        {
+            for (int i = 0; i < VisualTreeHelper.GetChildrenCount(parent); i++)
+            {
+                var child = VisualTreeHelper.GetChild(parent, i);
+                if (child != null && child is T tChild)
+                {
+                    return tChild;
+                }
+                else
+                {
+                    var result = FindVisualChild<T>(child);
+                    if (result != null)
+                    {
+                        return result;
+                    }
+                }
+            }
+            return null;
         }
     }
 }
