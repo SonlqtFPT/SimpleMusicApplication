@@ -346,5 +346,32 @@ namespace SimpleMusicApplication
                 audioFileReader.CurrentTime = TimeSpan.FromSeconds(audioFileReader.TotalTime.TotalSeconds * PositionSlider.Value);
             }
         }
+
+        private void Window_Loaded(object sender, RoutedEventArgs e)
+        {
+            LoadSongFromFolder(@"D:\Music");
+        }
+
+        private void LoadSongFromFolder(string folderPath)
+        {
+            try
+            {
+                var songFiles = Directory.GetFiles(folderPath, "*.*")
+                .Where(file => file.EndsWith(".mp3") || file.EndsWith(".wav")).ToList();
+
+                playlist.Clear();
+
+                foreach (var file in songFiles)
+                {
+                    playlist.Add(file);
+                }
+
+                PlaylistListBox.ItemsSource = songFiles.Select(Path.GetFileName).ToList();
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Have error here: " + ex.Message);
+            }
+        }
     }
 }
