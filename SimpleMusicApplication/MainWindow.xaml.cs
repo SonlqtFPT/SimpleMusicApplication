@@ -11,8 +11,12 @@ using System.Runtime.InteropServices;
 using System.Threading.Tasks;
 using System.Windows.Threading;
 using System.Windows.Controls.Primitives;
-using System.Windows.Input;
+
+using Hardcodet.Wpf.TaskbarNotification;
 using System.Windows.Media;
+using System.Drawing;
+using System.Windows.Input;
+
 
 
 namespace SimpleMusicApplication
@@ -28,11 +32,31 @@ namespace SimpleMusicApplication
         private DispatcherTimer positionTimer;
         private bool isDraggingSlider = false;
         private bool isAutoplay = false;
+
+        private TaskbarIcon _trayIcon;
+        private int clickCount = 0;
+
         private TimeSpan totalListeningTime = TimeSpan.Zero;
+
 
         public MainWindow()
         {
             InitializeComponent();
+            string iconPath = Path.Combine(Directory.GetCurrentDirectory(), "assets", "music.ico");
+
+            if (File.Exists(iconPath))
+            {
+                Icon icon = new Icon(iconPath);
+                _trayIcon = (TaskbarIcon)this.Resources["TrayIcon"];
+                _trayIcon.Icon = icon;
+                _trayIcon.Visibility = Visibility.Visible;
+                _trayIcon.TrayMouseDoubleClick += TrayIcon_TrayMouseDoubleClick;
+            }
+            else
+            {
+                MessageBox.Show($"Icon file not found at {iconPath}");
+            }
+            
             waveOutDevice = new WaveOutEvent();
             waveOutDevice.Volume = (float)VolumeSlider.Value; // Set initial volume
 
@@ -41,6 +65,20 @@ namespace SimpleMusicApplication
             positionTimer.Tick += PositionTimer_Tick;
 
             waveOutDevice.PlaybackStopped += OnPlaybackStopped;
+        }      
+
+        private void TrayIcon_DoubleClick(object sender, RoutedEventArgs e)
+        {
+            // Show the window when the tray icon is double-clicked
+            this.Show();
+            this.WindowState = WindowState.Normal;
+            this.Activate();  // Bring the window to the front
+        }
+
+        protected override void OnClosed(EventArgs e)
+        {
+            _trayIcon?.Dispose();
+            base.OnClosed(e);
         }
 
 
@@ -489,6 +527,31 @@ namespace SimpleMusicApplication
                 Properties.Settings.Default.Save();
                 LoadSongFromFolder(folderPath);
             }
+        }
+
+        private void Open_Click(object sender, RoutedEventArgs e)
+        {
+            this.Show();
+            this.WindowState = WindowState.Normal;
+        }
+
+        private void Exit_Click(object sender, RoutedEventArgs e)
+        {
+            Application.Current.Shutdown();
+        }
+
+        private void TrayIcon_TrayMouseDoubleClick(object sender, RoutedEventArgs e)
+        {         
+            this.Show();
+            this.WindowState = WindowState.Normal; 
+            this.Activate(); 
+        }
+
+        private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)
+        {
+            e.Cancel = true;
+            this.Hide();
+            _trayIcon.Visibility = Visibility.Visible;
         }
     }
 }
