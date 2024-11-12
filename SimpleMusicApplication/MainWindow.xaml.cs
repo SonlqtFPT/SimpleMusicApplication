@@ -71,7 +71,7 @@ namespace SimpleMusicApplication
             {
                 MessageBox.Show($"Icon file not found at {iconPath}");
             }
-            
+
             waveOutDevice = new WaveOutEvent();
             waveOutDevice.Volume = (float)VolumeSlider.Value; // Set initial volume
 
@@ -80,7 +80,7 @@ namespace SimpleMusicApplication
             positionTimer.Tick += PositionTimer_Tick;
 
             waveOutDevice.PlaybackStopped += OnPlaybackStopped;
-        }      
+        }
 
         protected override void OnClosed(EventArgs e)
         {
@@ -246,9 +246,13 @@ namespace SimpleMusicApplication
                 }
 
                 // Load the audio file using MediaFoundationReader for broader format support
-                if(fileExtension == ".mp3")
+                if (fileExtension == ".mp3")
                 {
                     audioFileReader = new Mp3FileReader(filePath);
+
+                    // Convert MP3 to PCM format (WaveFormat)
+                    WaveStream pcmStream = WaveFormatConversionStream.CreatePcmStream(audioFileReader);
+                    audioFileReader = pcmStream;
                 }
                 else if (fileExtension == ".wav")
                 {
@@ -264,9 +268,9 @@ namespace SimpleMusicApplication
                     return;
                 }
 
-
+                // Initialize and start playback
                 waveOutDevice = new WaveOutEvent();
-                waveOutDevice.Init(audioFileReader);
+                waveOutDevice.Init(audioFileReader);  // Ensure this uses the correct WaveFormat
                 waveOutDevice.PlaybackStopped += OnPlaybackStopped;
                 waveOutDevice.Play();
 
@@ -292,9 +296,14 @@ namespace SimpleMusicApplication
             }
             catch (Exception ex)
             {
+                // Log exception details for further investigation
+                Console.WriteLine($"Error during playback: {ex.Message}");
                 MessageBox.Show($"An error occurred: {ex.Message}", "Playback Error", MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
+
+
+
 
 
         private void OnPlaybackStopped(object sender, StoppedEventArgs e)
@@ -309,12 +318,12 @@ namespace SimpleMusicApplication
                 {
                     PlayMusic();
                 }
-                else if(currentLoopMode == LoopMode.All)
+                else if (currentLoopMode == LoopMode.All)
                 {
                     PlayNextTrack(); // Move to the next track
                 }
                 else
-                {                  
+                {
                     waveOutDevice.Stop();
                     return;
                 }
@@ -425,7 +434,7 @@ namespace SimpleMusicApplication
 
             if (thumb != null)
             {
-                Point position = e.GetPosition(thumb);
+                System.Windows.Point position = e.GetPosition(thumb);
                 if (!IsPointInsideThumb(thumb, position))
                 {
                     e.Handled = true; // Prevent the click from being processed if it's outside the thumb
@@ -433,7 +442,7 @@ namespace SimpleMusicApplication
             }
         }
 
-        private bool IsPointInsideThumb(Thumb thumb, Point point)
+        private bool IsPointInsideThumb(Thumb thumb, System.Windows.Point point)
         {
             return new Rect(0, 0, thumb.ActualWidth, thumb.ActualHeight).Contains(point);
         }
@@ -468,25 +477,11 @@ namespace SimpleMusicApplication
             this.Hide();
         }
 
-        private void Window_Loaded(object sender, RoutedEventArgs e)
-        {
-            if (playlist != null)
-            {
-                PlaylistListBox.Items.Clear();
-                foreach (string fileName in playlist)
-                {
-
-                    PlaylistListBox.Items.Add(Path.GetFileName(fileName));
-                }
-
-
-            }
-            return null;
-        }
 
         private void Window_Loaded(object sender, RoutedEventArgs e)
         {
             string musicFolderPath = Properties.Settings.Default.MusicFolderPath;
+
             if (Directory.Exists(musicFolderPath))
             {
                 LoadSongFromFolder(musicFolderPath);
@@ -496,7 +491,13 @@ namespace SimpleMusicApplication
                 musicFolderPath = Environment.GetFolderPath(Environment.SpecialFolder.MyMusic);
                 LoadSongFromFolder(musicFolderPath);
             }
+
+            if (playlist != null && playlist.Count > 0)
+            {
+                PlaylistListBox.ItemsSource = playlist.Select(file => Path.GetFileName(file)).ToList();
+            }
         }
+
 
         private void LoadSongFromFolder(string folderPath)
         {
@@ -531,7 +532,7 @@ namespace SimpleMusicApplication
             };
 
             if (openFileDialog.ShowDialog() == true)
-            {              
+            {
                 string folderPath = System.IO.Path.GetDirectoryName(openFileDialog.FileName);
                 Properties.Settings.Default.MusicFolderPath = folderPath;
                 Properties.Settings.Default.Save();
@@ -551,10 +552,10 @@ namespace SimpleMusicApplication
         }
 
         private void TrayIcon_TrayMouseDoubleClick(object sender, RoutedEventArgs e)
-        {         
+        {
             this.Show();
-            this.WindowState = WindowState.Normal; 
-            this.Activate(); 
+            this.WindowState = WindowState.Normal;
+            this.Activate();
         }
 
         private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)
@@ -601,7 +602,7 @@ namespace SimpleMusicApplication
 
             waveOutDevice?.Stop();
             audioFileReader?.Dispose();
-            audioFileReader = null;          
+            audioFileReader = null;
 
             playlist.Clear();
             PlaylistListBox.ItemsSource = null;
@@ -622,12 +623,35 @@ namespace SimpleMusicApplication
 
         private void AddFileButton_PreviewKeyDown(object sender, KeyEventArgs e)
         {
-            
+
             if (e.Key == Key.Space)
             {
-                e.Handled = true;  
+                e.Handled = true;
             }
         }
+
+        private void AutoplayCheckbox_Checked(object sender, RoutedEventArgs e)
+        {
+            isAutoplay = true;
+        }
+
+        private void AutoplayCheckbox_Unchecked(object sender, RoutedEventArgs e)
+        {
+            isAutoplay = false;
+        }
+        private void SearchTextBox_TextChanged(object sender, TextChangedEventArgs e)
+        {
+            string searchQuery = SearchTextBox.Text.ToLower();
+            var filteredPlaylist = playlist.Where(file => Path.GetFileName(file).ToLower().Contains(searchQuery)).ToList();
+            PlaylistListBox.ItemsSource = filteredPlaylist.Select(file => Path.GetFileName(file)).ToList();
+        }
+
+        private void ClearSearchButton_Click(object sender, RoutedEventArgs e)
+        {
+            SearchTextBox.Clear();
+            PlaylistListBox.ItemsSource = playlist.Select(file => Path.GetFileName(file)).ToList();
+        }
+
 
         private void AddFile_Click(object sender, RoutedEventArgs e)
         {

@@ -6,8 +6,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:Hardcodet.Wpf.TaskbarNotification;assembly=Hardcodet.NotifyIcon.Wpf"
         mc:Ignorable="d"
-
-        Title="MainWindow" Height="450" Width="800" Loaded="Window_Loaded" WindowStartupLocation="CenterScreen" Closing="Window_Closing">
+        Title="MP3 Player" Height="450" Width="843" Loaded="Window_Loaded" WindowStartupLocation="CenterScreen" Closing="Window_Closing">
 
     <Window.Resources>
         <local:TaskbarIcon x:Key="TrayIcon" Visibility="Collapsed" ToolTipText="Music application">
@@ -20,68 +19,77 @@
         </local:TaskbarIcon>
     </Window.Resources>
 
-    <Grid>
+    <Grid Background="#F4F4F4">
+        <!-- Search Section -->
+        <StackPanel Orientation="Horizontal" HorizontalAlignment="Left" Margin="10,10,0,358" Width="314">
+            <!-- Search TextBox -->
+            <TextBox x:Name="SearchTextBox" Width="140" Margin="0,0,10,0" 
+                     TextChanged="SearchTextBox_TextChanged" Background="#FFFFFF" BorderBrush="#DDDDDD" 
+                     BorderThickness="1" Padding="5" FontSize="14" Foreground="#333333" Text="" Height="35"/>
+            <Button x:Name="ClearSearchButton" Content="Clear" Width="49" Click="ClearSearchButton_Click"
+                    Background="#FF5722" Foreground="White" BorderBrush="#FF5722" Height="33"/>
+
+            <!-- Clear Search Button -->
+        </StackPanel>
+
         <!-- Playlist ListBox -->
-        <ListBox x:Name="PlaylistListBox" HorizontalAlignment="Left" Width="200" Margin="10,10,0,10" SelectionChanged="PlaylistListBox_SelectionChanged"/>
+        <ListBox x:Name="PlaylistListBox" HorizontalAlignment="Left" Width="200" Margin="10,81,0,10" SelectionChanged="PlaylistListBox_SelectionChanged"
+                 Background="#FFFFFF" BorderBrush="#DDDDDD" BorderThickness="1" Padding="5" FontSize="14" Foreground="#333333"/>
 
         <!-- Music Info and Controls -->
-        <StackPanel Orientation="Vertical" HorizontalAlignment="Right" Width="500" Margin="220,10,10,10">
-            <TextBlock x:Name="MusicTitleTextBlock" FontSize="20" FontWeight="Bold" Margin="0,0,0,10" Text="Select a Song"/>
+        <StackPanel Orientation="Vertical" HorizontalAlignment="Left" Width="609" Margin="224,10,0,10">
+            <TextBlock x:Name="MusicTitleTextBlock" FontSize="20" FontWeight="Bold" Margin="0,0,0,10" Text="Select a Song" Foreground="#333333" />
 
-            <TextBlock x:Name="TotalListeningTimeTextBlock" FontSize="14" Text="Total Listening Time: 0:00" Margin="0,0,0,0"/>
+            <TextBlock x:Name="TotalListeningTimeTextBlock" FontSize="14" Text="Total Listening Time: 0:00" Margin="0,0,0,0" Foreground="#666666"/>
 
-            <TextBlock x:Name="MusicInfoTextBlock" FontSize="14" Text="Duration: 0:00" Margin="10,0,0,0"/>
+            <TextBlock x:Name="MusicInfoTextBlock" FontSize="14" Text="Duration: 0:00" Margin="10,0,0,0" Foreground="#666666"/>
 
-            <CheckBox Content="Autoplay" Checked="AutoplayCheckbox_Checked" Unchecked="AutoplayCheckbox_Unchecked" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="10"/>
-
+            <CheckBox Content="Autoplay" Checked="AutoplayCheckbox_Checked" Unchecked="AutoplayCheckbox_Unchecked" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="10" Foreground="#333333" />
 
             <Slider x:Name="VolumeSlider" Minimum="0" Maximum="1" Value="0.5" TickFrequency="0.1" 
                     IsSnapToTickEnabled="True" VerticalAlignment="Bottom" HorizontalAlignment="Left" 
-                    Width="200" Margin="10" ValueChanged="VolumeSlider_ValueChanged"/>
+                    Width="200" Margin="10" ValueChanged="VolumeSlider_ValueChanged" Background="#E1E1E1" />
 
             <Slider x:Name="PositionSlider" Minimum="0" Maximum="1" Value="0" TickFrequency="0.01" 
                     IsSnapToTickEnabled="True" VerticalAlignment="Bottom" HorizontalAlignment="Left" 
                     Width="400" Margin="10" ValueChanged="PositionSlider_ValueChanged"
-                    PreviewMouseDown="PositionSlider_PreviewMouseDown" 
-                    />
+                    PreviewMouseDown="PositionSlider_PreviewMouseDown" Background="#E1E1E1"/>
 
-            <TextBlock x:Name="CurrentTimeTextBlock" FontSize="14" Text="0:00" Margin="10,0,0,0"/>
+            <TextBlock x:Name="CurrentTimeTextBlock" FontSize="14" Text="0:00" Margin="10,0,0,0" Foreground="#666666"/>
 
             <!-- Play Controls -->
             <StackPanel Orientation="Horizontal" Margin="0,10">
-                <Button x:Name="PlayButton" Content="Play" Width="75" Click="PlayButton_Click"/>
-                <Button x:Name="PauseButton" Content="Pause" Width="75" Click="PauseButton_Click"/>
-                <Button x:Name="PreviousButton" Content="Previous" Width="75" Click="PreviousButton_Click"/>
-                <Button x:Name="NextButton" Content="Next" Width="75" Click="NextButton_Click"/>
+                <Button x:Name="PlayButton" Content="Play" Width="75" Click="PlayButton_Click" Margin="5" Background="#4CAF50" Foreground="White" BorderBrush="#4CAF50"/>
+                <Button x:Name="PauseButton" Content="Pause" Width="75" Click="PauseButton_Click" Margin="5" Background="#FF9800" Foreground="White" BorderBrush="#FF9800"/>
+                <Button x:Name="PreviousButton" Content="Previous" Width="75" Click="PreviousButton_Click" Margin="5" Background="#03A9F4" Foreground="White" BorderBrush="#03A9F4"/>
+                <Button x:Name="NextButton" Content="Next" Width="75" Click="NextButton_Click" Margin="5" Background="#03A9F4" Foreground="White" BorderBrush="#03A9F4"/>
 
-                <Button x:Name="ClearAllButton" Content="Clear All" Width="75" Click="ClearAllButton_Click"/>
+                <Button x:Name="ClearAllButton" Content="Clear All" Width="75" Click="ClearAllButton_Click" Margin="5" Background="#FF5722" Foreground="White" BorderBrush="#FF5722"/>
 
                 <!-- Loop Button -->
-                <Button x:Name="LoopButton" Click="LoopButton_Click" Width="85">
+                <Button x:Name="LoopButton" Click="LoopButton_Click" Width="85" Margin="5" Background="#9C27B0" Foreground="White" BorderBrush="#9C27B0">
                     <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
                         <Image x:Name="LoopIcon" Width="20" Height="20" Margin="0,0,5,0" Source="pack://application:,,,/Assets/loopAll.ico"/>
-                        <TextBlock x:Name="LoopText" Text="Loop All"/>
+                        <TextBlock x:Name="LoopText" Text="Loop All" />
                     </StackPanel>
                 </Button>
 
-                <Button x:Name="Youtube" Content="Youtube" Width="75" Click="Youtube_Click"/>
-
+                <Button x:Name="Youtube" Content="Youtube" Width="75" Click="Youtube_Click" Margin="5" Background="#FF9800" Foreground="White" BorderBrush="#FF9800"/>
             </StackPanel>
 
             <!-- Add File Button with Context Menu -->
-            <Button x:Name="AddFileButton" Content="Add File(s)" Width="120" Margin="0,10" Click="AddFileButton_Click" PreviewKeyDown="AddFileButton_PreviewKeyDown">
+            <Button x:Name="AddFileButton" Content="Add File(s)" Width="120" Margin="0,10" Click="AddFileButton_Click" PreviewKeyDown="AddFileButton_PreviewKeyDown" Background="#4CAF50" Foreground="White" BorderBrush="#4CAF50">
                 <!-- DropDown Menu -->
                 <Button.ContextMenu>
                     <ContextMenu Width="150" HorizontalOffset="0" VerticalOffset="0">
-                        <MenuItem Header="Add File" Click="AddFile_Click" Padding="10,5"/>
-                        <MenuItem Header="Add Folder" Click="AddFolder_Click" Padding="10,5"/>
+                        <MenuItem Header="Add File" Click="AddFile_Click" Padding="10,5" Background="#F9F9F9"/>
+                        <MenuItem Header="Add Folder" Click="AddFolder_Click" Padding="10,5" Background="#F9F9F9"/>
                     </ContextMenu>
                 </Button.ContextMenu>
             </Button>
 
-
-            <Button x:Name="SavePlaylistButton" Content="Save Playlist" Click="SavePlaylistButton_Click" Margin="5"/>
-            <Button x:Name="LoadPlaylistButton" Content="Load Playlist" Click="LoadPlaylistButton_Click" Margin="5"/>
+            <Button x:Name="SavePlaylistButton" Content="Save Playlist" Click="SavePlaylistButton_Click" Margin="5" Background="#03A9F4" Foreground="White" BorderBrush="#03A9F4" Width="154"/>
+            <Button x:Name="LoadPlaylistButton" Content="Load Playlist" Click="LoadPlaylistButton_Click" Margin="5" Background="#03A9F4" Foreground="White" BorderBrush="#03A9F4" Width="154"/>
         </StackPanel>
     </Grid>
 </Window>

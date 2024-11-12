@@ -11,13 +11,18 @@
             <RowDefinition Height="Auto" />
             <RowDefinition Height="Auto" />
             <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
         </Grid.RowDefinitions>
 
         <TextBlock Grid.Row="0" Text="Enter a YouTube link:" FontSize="16" Margin="0,0,0,10" />
 
         <TextBox Grid.Row="1" x:Name="txtYoutubeLink" Padding="10" FontSize="14" />
 
-        <StackPanel Grid.Row="2" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,20,0,0">
+        <!-- Progress Bar to show download progress -->
+        <ProgressBar x:Name="downloadProgressBar" Grid.Row="2" Height="20" Margin="0,20,0,0" 
+                     Minimum="0" Maximum="100" Value="0" Visibility="Collapsed"/>
+
+        <StackPanel Grid.Row="3" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,20,0,0">
             <Button Content="Add" Padding="10,5" FontSize="14" Margin="0,0,10,0" Click="Button_Click" />
             <Button Content="Cancel" Padding="10,5" FontSize="14" Click="Button_Click_1" />
         </StackPanel>
