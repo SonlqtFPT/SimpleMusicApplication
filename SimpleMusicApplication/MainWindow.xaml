@@ -5,8 +5,9 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:SimpleMusicApplication"
         mc:Ignorable="d"
-        Title="MainWindow" Height="450" Width="800" Loaded="Window_Loaded"
-        >
+
+        Title="MainWindow" Height="450" Width="800" Loaded="Window_Loaded">
+
     <Grid>
         <!-- Playlist ListBox -->
         <ListBox x:Name="PlaylistListBox" HorizontalAlignment="Left" Width="200" Margin="10,10,0,10" SelectionChanged="PlaylistListBox_SelectionChanged"/>
@@ -46,7 +47,7 @@
             </StackPanel>
 
             <!-- Add Music Button -->
-            <Button x:Name="AddMusicButton" Content="Add Music" Width="100" Margin="0,10" Click="AddMusicButton_Click"/>
+            <Button x:Name="AddFolderButton" Content="Add Folder" Width="100" Margin="0,10" Click="AddFolderButton_Click" />
 
             <Button x:Name="SavePlaylistButton" Content="Save Playlist" Click="SavePlaylistButton_Click" Margin="5"/>
 

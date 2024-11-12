@@ -14,6 +14,7 @@ using System.Windows.Controls.Primitives;
 using System.Windows.Input;
 using System.Windows.Media;
 
+
 namespace SimpleMusicApplication
 {
     public partial class MainWindow : Window
@@ -193,11 +194,13 @@ namespace SimpleMusicApplication
                 return;
 
             string filePath = playlist[currentTrackIndex];
+            string fileExtension = Path.GetExtension(filePath).ToLower();
 
             try
             {
                 // Dispose previous resources
                 audioFileReader?.Dispose();
+                waveOutDevice?.Dispose();
 
                 // Detach the event handler from the old waveOutDevice if it exists
                 if (waveOutDevice != null)
@@ -207,9 +210,24 @@ namespace SimpleMusicApplication
                 }
 
                 // Load the audio file using MediaFoundationReader for broader format support
-                audioFileReader = new MediaFoundationReader(filePath);
+                if(fileExtension == ".mp3")
+                {
+                    audioFileReader = new Mp3FileReader(filePath);
+                }
+                else if (fileExtension == ".wav")
+                {
+                    audioFileReader = new WaveFileReader(filePath);
+                }
+                else
+                {
+                    MessageBox.Show("File extension is required mp3 or wav", "Wrong file extension", MessageBoxButton.OK, MessageBoxImage.Warning);
+                    return;
+                }
+
+
                 waveOutDevice = new WaveOutEvent();
                 waveOutDevice.Init(audioFileReader);
+
                 waveOutDevice.Play();
 
                 // Update UI
@@ -416,6 +434,61 @@ namespace SimpleMusicApplication
 
             }
             return null;
+        }
+
+        private void Window_Loaded(object sender, RoutedEventArgs e)
+        {
+            string musicFolderPath = Properties.Settings.Default.MusicFolderPath;
+            if (Directory.Exists(musicFolderPath))
+            {
+                LoadSongFromFolder(musicFolderPath);
+            }
+            else
+            {
+                musicFolderPath = Environment.GetFolderPath(Environment.SpecialFolder.MyMusic);
+                LoadSongFromFolder(musicFolderPath);
+            }
+        }
+
+        private void LoadSongFromFolder(string folderPath)
+        {
+            try
+            {
+                var songFiles = Directory.GetFiles(folderPath, "*.*")
+                .Where(file => file.EndsWith(".mp3") || file.EndsWith(".wav")).ToList();
+
+                playlist.Clear();
+
+                foreach (var file in songFiles)
+                {
+                    playlist.Add(file);
+                }
+
+                PlaylistListBox.ItemsSource = songFiles.Select(Path.GetFileName).ToList();
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Have error here: " + ex.Message);
+            }
+        }
+
+        private void AddFolderButton_Click(object sender, RoutedEventArgs e)
+        {
+            OpenFileDialog openFileDialog = new OpenFileDialog
+            {
+                ValidateNames = false,
+                CheckFileExists = false,
+                CheckPathExists = true,
+                FileName = "Select song folder"
+            };
+
+            if (openFileDialog.ShowDialog() == true)
+            {              
+                string folderPath = System.IO.Path.GetDirectoryName(openFileDialog.FileName);
+                Properties.Settings.Default.MusicFolderPath = folderPath;
+                Properties.Settings.Default.Save();
+                LoadSongFromFolder(folderPath);
+            }
         }
     }
 }
