@@ -1,11 +1,23 @@
 ﻿<Window x:Class="SimpleMusicApplication.MainWindow"
+        Icon="pack://application:,,,/Assets/music.ico"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        xmlns:local="clr-namespace:SimpleMusicApplication"
+        xmlns:local="clr-namespace:Hardcodet.Wpf.TaskbarNotification;assembly=Hardcodet.NotifyIcon.Wpf"
         mc:Ignorable="d"
-        Title="MainWindow" Height="450" Width="800" Loaded="Window_Loaded">
+        Title="MainWindow" Height="450" Width="800" Loaded="Window_Loaded" WindowStartupLocation="CenterScreen" Closing="Window_Closing">
+ 
+    <Window.Resources>
+        <local:TaskbarIcon x:Key="TrayIcon" Visibility="Collapsed" ToolTipText="Music application" DoubleClickCommand="{Binding ShowWindowCommand}"> 
+            <local:TaskbarIcon.ContextMenu>
+                <ContextMenu>
+                    <MenuItem Header="Open" Click="Open_Click"/>
+                    <MenuItem Header="Exit" Click="Exit_Click"/>
+                </ContextMenu>
+            </local:TaskbarIcon.ContextMenu>
+        </local:TaskbarIcon>
+    </Window.Resources>
     <Grid>
         <!-- Playlist ListBox -->
         <ListBox x:Name="PlaylistListBox" HorizontalAlignment="Left" Width="200" Margin="10,10,0,10" SelectionChanged="PlaylistListBox_SelectionChanged"/>
