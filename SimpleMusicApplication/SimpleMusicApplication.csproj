@@ -9,7 +9,10 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <None Remove="Assets\loop1.ico" />
+    <None Remove="Assets\loopAll.ico" />
     <None Remove="Assets\music.ico" />
+    <None Remove="Assets\noLoop.ico" />
   </ItemGroup>
 
   <ItemGroup>
@@ -18,7 +21,16 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Content Include="Assets\loop1.ico">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Resource Include="Assets\loopAll.ico">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Resource>
     <Content Include="Assets\music.ico">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Assets\noLoop.ico">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
   </ItemGroup>

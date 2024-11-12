@@ -15,6 +15,7 @@ using Hardcodet.Wpf.TaskbarNotification;
 using System.Windows.Media;
 using System.Drawing;
 using System.Windows.Input;
+using System.Windows.Media.Imaging;
 
 
 namespace SimpleMusicApplication
@@ -29,9 +30,15 @@ namespace SimpleMusicApplication
         private bool isShuffle = false;
         private DispatcherTimer positionTimer;
         private bool isDraggingSlider = false;
-        private bool isAutoplay = false;
         private TaskbarIcon _trayIcon;
-        private int clickCount = 0;
+        private enum LoopMode
+        {
+            None,
+            All,
+            One
+        }
+
+        private LoopMode currentLoopMode = LoopMode.All;
 
         public MainWindow()
         {
@@ -192,10 +199,12 @@ namespace SimpleMusicApplication
             }
             else
             {
-                currentTrackIndex = (currentTrackIndex + 1) % playlist.Count;
+                currentTrackIndex++;
+                if (currentTrackIndex >= playlist.Count)
+                {
+                    currentTrackIndex = 0;
+                }
             }
-
-            PlaylistListBox.SelectedIndex = currentTrackIndex;
             PlayMusic();
         }
 
@@ -217,16 +226,6 @@ namespace SimpleMusicApplication
             PlayMusic();
         }
 
-        private void AutoplayCheckbox_Checked(object sender, RoutedEventArgs e)
-        {
-            isAutoplay = true;
-        }
-
-        private void AutoplayCheckbox_Unchecked(object sender, RoutedEventArgs e)
-        {
-            isAutoplay = false;
-        }
-
         private void PlayMusic()
         {
             if (currentTrackIndex < 0 || currentTrackIndex >= playlist.Count)
@@ -239,7 +238,6 @@ namespace SimpleMusicApplication
             {
                 // Dispose previous resources
                 audioFileReader?.Dispose();
-                waveOutDevice?.Dispose();
 
                 // Detach the event handler from the old waveOutDevice if it exists
                 if (waveOutDevice != null)
@@ -257,6 +255,10 @@ namespace SimpleMusicApplication
                 {
                     audioFileReader = new WaveFileReader(filePath);
                 }
+                else if (fileExtension == ".m4a")
+                {
+                    audioFileReader = new MediaFoundationReader(filePath);
+                }
                 else
                 {
                     MessageBox.Show("File extension is required mp3 or wav", "Wrong file extension", MessageBoxButton.OK, MessageBoxImage.Warning);
@@ -266,7 +268,7 @@ namespace SimpleMusicApplication
 
                 waveOutDevice = new WaveOutEvent();
                 waveOutDevice.Init(audioFileReader);
-
+                waveOutDevice.PlaybackStopped += OnPlaybackStopped;
                 waveOutDevice.Play();
 
                 // Update UI
@@ -282,10 +284,6 @@ namespace SimpleMusicApplication
 
                 // Start the position timer
                 positionTimer.Start();
-
-                // Re-subscribe to the PlaybackStopped event if autoplay is enabled
-                waveOutDevice.PlaybackStopped += OnPlaybackStopped;
-
             }
             catch (COMException ex) when ((uint)ex.ErrorCode == 0xC00D36C4)
             {
@@ -306,9 +304,21 @@ namespace SimpleMusicApplication
             {
                 MessageBox.Show($"Playback error: {e.Exception.Message}", "Playback Error", MessageBoxButton.OK, MessageBoxImage.Error);
             }
-            else if (isAutoplay)
+            else
             {
-                PlayNextTrack(); // Play the next track when the current one ends if autoplay is enabled
+                if (currentLoopMode == LoopMode.One)
+                {
+                    PlayMusic();
+                }
+                else if(currentLoopMode == LoopMode.All)
+                {
+                    PlayNextTrack(); // Move to the next track
+                }
+                else
+                {                  
+                    waveOutDevice.Stop();
+                    return;
+                }
             }
         }
 
@@ -419,7 +429,7 @@ namespace SimpleMusicApplication
             try
             {
                 var songFiles = Directory.GetFiles(folderPath, "*.*")
-                .Where(file => file.EndsWith(".mp3") || file.EndsWith(".wav")).ToList();
+                .Where(file => file.EndsWith(".mp3") || file.EndsWith(".wav") || file.EndsWith(".m4a")).ToList();
 
                 playlist.Clear();
 
@@ -478,6 +488,38 @@ namespace SimpleMusicApplication
             e.Cancel = true;
             this.Hide();
             _trayIcon.Visibility = Visibility.Visible;
+        }
+
+        private void LoopButton_Click(object sender, RoutedEventArgs e)
+        {
+            currentLoopMode = currentLoopMode switch
+            {
+                LoopMode.All => LoopMode.One,
+                LoopMode.One => LoopMode.None,
+                LoopMode.None => LoopMode.All,
+                _ => LoopMode.All,
+            };
+
+            UpdateLoopButtonUI();
+        }
+
+        private void UpdateLoopButtonUI()
+        {
+            switch (currentLoopMode)
+            {
+                case LoopMode.All:
+                    LoopIcon.Source = new BitmapImage(new Uri("pack://application:,,,/Assets/loopAll.ico"));
+                    LoopText.Text = "Loop All";
+                    break;
+                case LoopMode.One:
+                    LoopIcon.Source = new BitmapImage(new Uri("pack://application:,,,/Assets/loop1.ico"));
+                    LoopText.Text = "Loop One";
+                    break;
+                case LoopMode.None:
+                    LoopIcon.Source = new BitmapImage(new Uri("pack://application:,,,/Assets/noLoop.ico"));
+                    LoopText.Text = "No Loop";
+                    break;
+            }
         }
     }
 }
