@@ -367,7 +367,16 @@ namespace SimpleMusicApplication
 
         private void Window_Loaded(object sender, RoutedEventArgs e)
         {
-            LoadSongFromFolder(@"D:\Music");
+            string musicFolderPath = Properties.Settings.Default.MusicFolderPath;
+            if (Directory.Exists(musicFolderPath))
+            {
+                LoadSongFromFolder(musicFolderPath);
+            }
+            else
+            {
+                musicFolderPath = Environment.GetFolderPath(Environment.SpecialFolder.MyMusic);
+                LoadSongFromFolder(musicFolderPath);
+            }
         }
 
         private void LoadSongFromFolder(string folderPath)
@@ -399,17 +408,16 @@ namespace SimpleMusicApplication
                 ValidateNames = false,
                 CheckFileExists = false,
                 CheckPathExists = true,
-                FileName = "Folder Selection."
+                FileName = "Select song folder"
             };
 
             if (openFileDialog.ShowDialog() == true)
             {              
                 string folderPath = System.IO.Path.GetDirectoryName(openFileDialog.FileName);
+                Properties.Settings.Default.MusicFolderPath = folderPath;
+                Properties.Settings.Default.Save();
                 LoadSongFromFolder(folderPath);
             }
-
-
-
         }
     }
 }
