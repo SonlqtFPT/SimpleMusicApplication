@@ -46,6 +46,23 @@
             <Button x:Name="SavePlaylistButton" Content="Save Playlist" Click="SavePlaylistButton_Click" Margin="5"/>
 
             <Button x:Name="LoadPlaylistButton" Content="Load Playlist" Click="LoadPlaylistButton_Click" Margin="5"/>
+
         </StackPanel>
+
+        <!--Sleep timer-->
+        <ComboBox x:Name="SleepComboBox" HorizontalAlignment="Left" Height="25" 
+          Margin="674,236,0,0" VerticalAlignment="Top" Width="96" 
+          SelectionChanged="SleepComboBox_SelectionChanged" SelectedIndex="0">
+            <ComboBoxItem Content="Sleep Timer" IsEnabled="False"/>
+            <ComboBoxItem Content="5m"/>
+            <ComboBoxItem Content="10m"/>
+            <ComboBoxItem Content="15m"/>
+            <ComboBoxItem Content="30m"/>
+            <ComboBoxItem Content="45m"/>
+            <ComboBoxItem Content="1h"/>
+            <ComboBoxItem Content="End of Song"/>
+            <ComboBoxItem Content="Cancel"/>
+        </ComboBox>
+
     </Grid>
 </Window>

@@ -26,6 +26,7 @@ namespace SimpleMusicApplication
         private bool isDraggingSlider = false;
         private bool isAutoplay = false;
         private float previousVolume;
+        private DispatcherTimer sleepTimer; // dành cho sleep timer
 
         public MainWindow()
         {
@@ -360,6 +361,84 @@ namespace SimpleMusicApplication
         {
             // Khôi phục lại mức âm lượng trước đó
             waveOutDevice.Volume = previousVolume;
+        }
+
+        private void SleepComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            // Lấy item đã chọn
+            var selectedItem = SleepComboBox.SelectedItem as ComboBoxItem;
+
+            if (selectedItem != null)
+            {
+                string selectedContent = selectedItem.Content.ToString();
+
+                if (selectedContent == "Cancel")
+                {
+                    // Reset lại ComboBox khi chọn Cancel
+                    SleepComboBox.SelectedIndex = 0;
+                    // Reset lại Sleep timer (nếu có)
+                    if (sleepTimer != null)
+                    {
+                        sleepTimer.Stop();
+                        sleepTimer = null;
+                    }
+                }
+                else
+                {
+                    // Lấy giá trị thời gian sleep đã chọn và bắt đầu hẹn giờ
+                    StartSleepTimer(selectedContent);
+                }
+            }
+        }
+
+        private void StartSleepTimer(string selectedTime)
+        {
+            // Nếu sleep timer đang chạy, dừng lại
+            sleepTimer?.Stop();
+
+            // Chuyển đổi giá trị thành thời gian và bắt đầu hẹn giờ
+            int minutes = 0;
+
+            switch (selectedTime)
+            {
+                case "5m":
+                    minutes = 5;
+                    break;
+                case "10m":
+                    minutes = 10;
+                    break;
+                case "15m":
+                    minutes = 15;
+                    break;
+                case "30m":
+                    minutes = 30;
+                    break;
+                case "45m":
+                    minutes = 45;
+                    break;
+                case "1h":
+                    minutes = 60;
+                    break;
+                case "End of Song":
+                    // Nếu chọn "End of Song", sẽ tính thời gian còn lại của bài hát
+                    minutes = (int)(audioFileReader.TotalTime.TotalMinutes - audioFileReader.CurrentTime.TotalMinutes);
+                    break;
+            }
+
+            // Khởi tạo sleep timer mới
+            sleepTimer = new DispatcherTimer
+            {
+                Interval = TimeSpan.FromMinutes(minutes)
+            };
+            sleepTimer.Tick += SleepTimer_Tick;
+            sleepTimer.Start();
+        }
+
+        private void SleepTimer_Tick(object sender, EventArgs e)
+        {
+            // Dừng phát nhạc khi hết thời gian
+            waveOutDevice?.Stop();
+            sleepTimer?.Stop();
         }
     }
 }
