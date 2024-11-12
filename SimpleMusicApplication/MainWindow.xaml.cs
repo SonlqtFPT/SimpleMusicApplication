@@ -389,6 +389,7 @@ namespace SimpleMusicApplication
                         return result;
                     }
                 }
+
             }
             return null;
         }
@@ -412,7 +413,9 @@ namespace SimpleMusicApplication
                     PlaylistListBox.Items.Add(Path.GetFileName(fileName));
                 }
 
+
             }
+            return null;
         }
     }
 }
