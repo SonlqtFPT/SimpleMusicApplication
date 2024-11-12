@@ -197,11 +197,13 @@ namespace SimpleMusicApplication
                 return;
 
             string filePath = playlist[currentTrackIndex];
+            string fileExtension = Path.GetExtension(filePath).ToLower();
 
             try
             {
                 // Dispose previous resources
                 audioFileReader?.Dispose();
+                waveOutDevice?.Dispose();
 
                 // Detach the event handler from the old waveOutDevice if it exists
                 if (waveOutDevice != null)
@@ -211,9 +213,24 @@ namespace SimpleMusicApplication
                 }
 
                 // Load the audio file using MediaFoundationReader for broader format support
-                audioFileReader = new MediaFoundationReader(filePath);
+                if(fileExtension == ".mp3")
+                {
+                    audioFileReader = new Mp3FileReader(filePath);
+                }
+                else if (fileExtension == ".wav")
+                {
+                    audioFileReader = new WaveFileReader(filePath);
+                }
+                else
+                {
+                    MessageBox.Show("File extension is required mp3 or wav", "Wrong file extension", MessageBoxButton.OK, MessageBoxImage.Warning);
+                    return;
+                }
+
+
                 waveOutDevice = new WaveOutEvent();
                 waveOutDevice.Init(audioFileReader);
+
                 waveOutDevice.Play();
 
                 // Update UI
