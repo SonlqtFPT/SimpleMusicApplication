@@ -38,7 +38,7 @@ namespace SimpleMusicApplication
         private DispatcherTimer positionTimer;
         private bool isDraggingSlider = false;
 
-        private bool isAutoplay = false;
+        //private bool isAutoplay = false;
 
 
         private TaskbarIcon _trayIcon;
@@ -180,6 +180,10 @@ namespace SimpleMusicApplication
 
         private void PlayNextTrack()
         {
+            if (playlist == null || playlist.Count == 0)
+            {
+                return; // No tracks to play
+            }
             if (isShuffle)
             {
                 var random = new Random();
@@ -198,12 +202,9 @@ namespace SimpleMusicApplication
             }
             else
             {
-                currentTrackIndex++;
-                if (currentTrackIndex >= playlist.Count)
-                {
-                    currentTrackIndex = 0;
-                }
+                currentTrackIndex = (currentTrackIndex + 1) % playlist.Count;
             }
+            PlaylistListBox.SelectedIndex = currentTrackIndex;
             PlayMusic();
         }
 
@@ -248,7 +249,8 @@ namespace SimpleMusicApplication
                 // Load the audio file using MediaFoundationReader for broader format support
                 if (fileExtension == ".mp3")
                 {
-                    audioFileReader = new Mp3FileReader(filePath);
+                    //audioFileReader = new Mp3FileReader(filePath);
+                    audioFileReader = new MediaFoundationReader(filePath);
 
                     // Convert MP3 to PCM format (WaveFormat)
                     WaveStream pcmStream = WaveFormatConversionStream.CreatePcmStream(audioFileReader);
@@ -291,26 +293,23 @@ namespace SimpleMusicApplication
             catch (COMException ex) when ((uint)ex.ErrorCode == 0xC00D36C4)
             {
                 // Error: unsupported format, skip to the next track
-                MessageBox.Show($"Unsupported format for file: {filePath}", "Playback Error", MessageBoxButton.OK, MessageBoxImage.Warning);
+                MessageBox.Show($"Unsupported format for file: {filePath}", "Playback Error1", MessageBoxButton.OK, MessageBoxImage.Warning);
                 PlayNextTrack(); // Skip to the next song
             }
             catch (Exception ex)
             {
                 // Log exception details for further investigation
                 Console.WriteLine($"Error during playback: {ex.Message}");
-                MessageBox.Show($"An error occurred: {ex.Message}", "Playback Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                MessageBox.Show($"An error occurred: {ex.Message}", "Playback Error2", MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
-
-
-
 
 
         private void OnPlaybackStopped(object sender, StoppedEventArgs e)
         {
             if (e.Exception != null)
             {
-                MessageBox.Show($"Playback error: {e.Exception.Message}", "Playback Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                MessageBox.Show($"Playback error: {e.Exception.Message}", "Playback Error3", MessageBoxButton.OK, MessageBoxImage.Error);
             }
             else
             {
@@ -365,20 +364,21 @@ namespace SimpleMusicApplication
             {
                 var loadedPlaylist = await File.ReadAllLinesAsync(filePath);
                 playlist.Clear();
-                PlaylistListBox.Items.Clear();
 
                 foreach (var file in loadedPlaylist)
                 {
                     if (File.Exists(file))
                     {
                         playlist.Add(file);
-                        PlaylistListBox.Items.Add(Path.GetFileName(file));
                     }
                     else
                     {
                         MessageBox.Show($"File not found: {file}", "Error", MessageBoxButton.OK, MessageBoxImage.Warning);
                     }
                 }
+
+                PlaylistListBox.ItemsSource = null; // Reset the ItemsSource to refresh the ListBox
+                PlaylistListBox.ItemsSource = playlist.Select(file => Path.GetFileName(file)).ToList();
 
                 MessageBox.Show("Playlist loaded successfully!", "Load Playlist", MessageBoxButton.OK, MessageBoxImage.Information);
             }
@@ -387,6 +387,7 @@ namespace SimpleMusicApplication
                 MessageBox.Show($"Playlist file not found: {filePath}", "Load Playlist", MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
+
 
         private void VolumeSlider_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
         {
@@ -632,12 +633,12 @@ namespace SimpleMusicApplication
 
         private void AutoplayCheckbox_Checked(object sender, RoutedEventArgs e)
         {
-            isAutoplay = true;
+            //isAutoplay = true;
         }
 
         private void AutoplayCheckbox_Unchecked(object sender, RoutedEventArgs e)
         {
-            isAutoplay = false;
+            //isAutoplay = false;
         }
         private void SearchTextBox_TextChanged(object sender, TextChangedEventArgs e)
         {
