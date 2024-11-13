@@ -45,9 +45,12 @@
             <TextBlock x:Name="MusicInfoTextBlock" FontSize="14" Text="Duration: 0:00" Margin="10,0,0,0" Foreground="#666666"/>
 
 
-            <Slider x:Name="VolumeSlider" Minimum="0" Maximum="1" Value="0.5" TickFrequency="0.1" 
-                    IsSnapToTickEnabled="True" VerticalAlignment="Bottom" HorizontalAlignment="Left" 
-                    Width="200" Margin="10" ValueChanged="VolumeSlider_ValueChanged" Background="#E1E1E1" />
+            <StackPanel Orientation="Horizontal" VerticalAlignment="Bottom" HorizontalAlignment="Left" Margin="10">
+                <Slider x:Name="VolumeSlider" Minimum="0" Maximum="1" Value="0.5" TickFrequency="0.1" 
+                    IsSnapToTickEnabled="True" Width="200" ValueChanged="VolumeSlider_ValueChanged" Background="#E1E1E1"/>
+                <TextBlock x:Name="VolumePercentageTextBlock" FontSize="14" Margin="10,0,0,0" Foreground="#666666" Text="50%"/>
+            </StackPanel>
+
 
             <Slider x:Name="PositionSlider" Minimum="0" Maximum="1" Value="0" TickFrequency="0.01" 
                     IsSnapToTickEnabled="True" VerticalAlignment="Bottom" HorizontalAlignment="Left" 

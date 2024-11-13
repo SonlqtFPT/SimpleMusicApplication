@@ -393,7 +393,8 @@ namespace SimpleMusicApplication
         {
             if (waveOutDevice != null)
             {
-                waveOutDevice.Volume = (float)VolumeSlider.Value;
+                waveOutDevice.Volume = (float)e.NewValue;
+                VolumePercentageTextBlock.Text = $"{(int)(e.NewValue * 100)}%";
             }
         }
 
@@ -401,11 +402,12 @@ namespace SimpleMusicApplication
         {
             if (audioFileReader != null && audioFileReader.Length > 0)
             {
-                var currentTime = audioFileReader.CurrentTime.TotalSeconds / audioFileReader.TotalTime.TotalSeconds;
+                var currentTime = audioFileReader.CurrentTime;
+                var totalTime = audioFileReader.TotalTime;
                 PositionSlider.ValueChanged -= PositionSlider_ValueChanged; // Detach event handler
-                PositionSlider.Value = currentTime;
+                PositionSlider.Value = currentTime.TotalSeconds / totalTime.TotalSeconds;
                 PositionSlider.ValueChanged += PositionSlider_ValueChanged; // Reattach event handler
-                CurrentTimeTextBlock.Text = TimeSpan.FromSeconds(audioFileReader.CurrentTime.TotalSeconds).ToString(@"mm\:ss");
+                CurrentTimeTextBlock.Text = $"{currentTime.ToString(@"mm\:ss")} / {totalTime.ToString(@"mm\:ss")}";
                 TotalListeningTimeTextBlock.Text = $"Total Listening Time: {totalListeningTime.ToString(@"hh\:mm\:ss")}";
             }
         }
